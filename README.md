@@ -36,8 +36,8 @@ where `definition` is an object that takes the following properties:
 For instance:
 ```js
 var definition = {
-  x:[{type:'time', label: 'Date of event'}],
-  y:[{type:'unit', label: '# of events'}],
+  x:{type:'time', label: 'Date of event'},
+  y:{label: '# of events'},
   width: 600,
   height: 400
 };
