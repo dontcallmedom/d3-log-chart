@@ -297,10 +297,12 @@ define(['ramda', 'd3'], function (R, d3) {
 
             bar.enter().append("rect")
                 .attr("x", R.compose(x, formatData(xType), R.prop("key")))
-                .attr("width", s.width ? (typeof s.width === "function" ? s.width(x.rangeBand()) : s.width) : x.rangeBand());
+                .attr("width", s.width ? (typeof s.width === "function" ? s.width(x.rangeBand()) : s.width) : x.rangeBand())
+                .append("title");
             bar.attr("y", function(d) { return y(d.values + d.valueOffset) ; })
             // y.range()[0] - y(d.values)
-                .attr("height", R.compose(R.subtract(y.range()[0]), y, R.prop("values")));
+                .attr("height", R.compose(R.subtract(y.range()[0]), y, R.prop("values")))
+                .select("title").text(R.prop("values"));
             bar.exit().remove();
             s.labelTypes = s.labelTypes || [];
             var total = 0;
