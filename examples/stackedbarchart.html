@@ -1,0 +1,53 @@
+<!doctype html>
+<html>
+<head>
+<meta charset=utf-8>
+<title>Stacked Bar Chart</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/0.0.1/prism.min.css">
+<style>.axis {
+  font: 10px sans-serif;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+</style>
+</head>
+<body>
+<p>We assume we start from a <a href="data.json">data set</a> presented as a list of objecs à la :</p>
+<pre>[
+  {
+   "date": "2014-12-10T18:24:54+00:00",
+   "gender": "male",
+    "age": "30-40",
+    "country": "Oman"
+  }, …
+]</pre>
+<p>We want to obtain the following stacked bar chart:</p>
+<div id='chart'>
+</div>
+
+
+<p>We define an object representing the chart space: the axes for our chart (time in abscisses, new registrations in ordinates), set on a 600x400 area:</p>
+<pre data-src="base-chart.js"></pre>
+<p>We then define the disaggregators, i.e. the alternate views by which our data will be displayed in stacked bar charts:</p>
+<pre data-src='disaggregator.js'>
+</pre>
+<p>With all that, the following code make use of the Chart library to draw the bar chart:</p>
+<pre data-src='stacked.js' class='js'>
+</pre>
+<!-- these were split out to facilitate the "show and tell -->
+<script src="base-chart.js"></script>
+<script src="continents.js"></script>
+<script src="disaggregator.js"></script>
+
+<!-- we use require to load our module and its dependencies -->
+<script data-main="stacked.js" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.16/require.min.js"></script>
+
+<!-- this is to show and tell, not needed in general for charts -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/0.0.1/prism.min.js"></script>
+</body>
+</html>
