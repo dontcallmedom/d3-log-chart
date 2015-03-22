@@ -51,13 +51,14 @@ We define ways in which we want to split our data through “disaggregators”:
 ```js
 var disaggregators = [{"by HTTP method":
                           {groupBy: "method",
-                           labels: [{value: "GET", color: "red"},
+                           labels: [{value: "GET", color: "blue"},
                                     {value: "POST", color: "green"}]},
                       {"by top-level dir":
-                          {groupBy: function(d) { return d.path.split("/")[0];},
-                          labels: [{value: "":, color: "yellow"},
-                                   {value: "about", color: "blue"}]}
-                      ];
+                          {groupBy: function(d) { return d.path.split("/")[0];}
+                      // if labels aren't defined, they default to the value
+                      // used for grouping, and the color are taken from
+                      // a default palette
+                      }];
 ```
 and use them with the `disaggregators` setter:
 ```js

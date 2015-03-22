@@ -23,12 +23,6 @@ var disaggregators = (function () {
                            {value: "30-40", color: "purple"},
                            {value: "40-50", color: "marroon"},
                            {value: "50+", color:"gray"}]},
-        "by continent": {groupBy: byContinent,
-                         labels: [{value:"Asia", color: "#0FF"},
-                                  {value: "Africa", color:"#0F0"},
-                                  {value: "North America", color: "#FF0"},
-                                  {value: "South America", color: "#770"},
-                                  {value:"Europe", color: "#077"},
-                                  {value: "Oceania", color: "#0A0"}]}
+        "by continent": {groupBy: byContinent}
    };
 })();

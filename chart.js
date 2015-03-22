@@ -41,6 +41,7 @@ define(['ramda', 'd3'], function (R, d3) {
         var propAOrB = R.flip(R.useWith(R.converge(R.defaultTo), R.prop, R.prop));
 
         function sortByArrayOrder(array) {
+            array = Array.isArray(array) ? array : [];
             var arrayIndex = R.indexOf(R.__, array);
             return R.useWith(d3.ascending, arrayIndex, arrayIndex);
         }
@@ -142,6 +143,9 @@ define(['ramda', 'd3'], function (R, d3) {
                 ds = nestBy(s.groupBy)(ds);
                 ds = ds.rollup(R.length).entries(filteredData);
 
+                var missingLabels = R.difference(ds.map(R.prop("key")), order).sort();
+                _disaggregators[k].labels = _disaggregators[k].labels.concat(missingLabels.map(R.assoc("value", R.__, {})));
+
                 if (s.process === "integrate") {
                     ds = ds.map(function (o) { o.values = integrate(o.values); return o;});
                 }
@@ -198,6 +202,32 @@ define(['ramda', 'd3'], function (R, d3) {
         }
 
         function colorScale(by) {
+            var scaleSize = _disaggregators[by].labels.length;
+            var palette;
+            if (scaleSize <= 10) {
+                palette = d3.scale.category10().range();
+            } else if (scaleSize <= 20) {
+                palette = d3.scale.category20().range();
+            } else if (scaleSize <= 40) {
+                palette = d3.scale.category20().range().concat(d3.scale.category20b().range());
+            } else if (scaleSize <= 60) {
+                palette = d3.scale.category20().range().concat(d3.scale.category20b().range()).concat(d3.scale.category20c().range());
+            } else {
+                console.error("d3-log-chart doesn't support more than 60 colors in its default palette");
+            }
+
+            // we keep only colors that aren't used in the ones provided
+            var definedColors = _disaggregators[by].labels.map(R.prop("color"));
+            palette = R.difference(palette, definedColors);
+
+            var paletteIndex = 0;
+            _disaggregators[by].labels.forEach(function(l) {
+                if (l.color === undefined) {
+                    l.color = palette[paletteIndex];
+                    paletteIndex++;
+                }
+            });
+
             return d3.scale.ordinal()
                 .domain(_disaggregators[by].labels.map(propAOrB("name", "value")))
                 .range(_disaggregators[by].labels.map(R.prop("color")));
@@ -416,6 +446,9 @@ define(['ramda', 'd3'], function (R, d3) {
                 var m = R.clone(l);
                 if (typeof m.groupBy === "string") {
                     m.groupBy = R.prop(m.groupBy);
+                }
+                if (m.labels === undefined) {
+                    m.labels = [];
                 }
                 return m;
             }, d);
