@@ -1,7 +1,6 @@
 var disaggregators = (function () {
    // var continents = { 'Asia': ["Oman", "Pakistan", …], …};
 
-   var prop = function (key) { return function(d) { return d[key];};};
    var byContinent = function(d) {
        var country = d.country;
        var continent = Object.keys(continents).filter(function (c) {
@@ -14,10 +13,10 @@ var disaggregators = (function () {
                         labels: [{value:"undefined",
                                   name:"all users",
                                   color: "steelblue"}]},
-        "by gender": {groupBy: prop("gender"),
+        "by gender": {groupBy: "gender",
                       labels: [{value:"female", color: "#ff69b4"},
                                {value:"male", color: "#00F"}]},
-       "by age": {groupBy: prop("age"),
+       "by age": {groupBy: "age",
                   labels: [{value:"18-", color: "yellow"},
                            {value:"18-25",color:"orange"},
                            {value:"25-30", color: "red"},

@@ -50,7 +50,7 @@ c.drawAxes();
 We define ways in which we want to split our data through “disaggregators”:
 ```js
 var disaggregators = [{"by HTTP method":
-                          {groupBy: function(d) { return d.method;},
+                          {groupBy: "method",
                            labels: [{value: "GET", color: "red"},
                                     {value: "POST", color: "green"}]},
                       {"by top-level dir":

@@ -412,7 +412,13 @@ define(['ramda', 'd3'], function (R, d3) {
         }
 
         function disaggregators(d) {
-            _disaggregators = R.clone(d);
+            _disaggregators = R.mapObj(function (l) {
+                var m = R.clone(l);
+                if (typeof m.groupBy === "string") {
+                    m.groupBy = R.prop(m.groupBy);
+                }
+                return m;
+            }, d);
             return this;
         }
 
