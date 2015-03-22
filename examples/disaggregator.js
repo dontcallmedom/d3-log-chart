@@ -9,10 +9,7 @@ var disaggregators = (function () {
        return continent;
    }
    return {
-        "global view": {groupBy: prop("foo"),
-                        labels: [{value:"undefined",
-                                  name:"all users",
-                                  color: "steelblue"}]},
+        "global view": {},
         "by gender": {groupBy: "gender",
                       labels: [{value:"female", color: "#ff69b4"},
                                {value:"male", color: "#00F"}]},

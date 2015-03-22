@@ -144,6 +144,7 @@ define(['ramda', 'd3'], function (R, d3) {
                 ds = ds.rollup(R.length).entries(filteredData);
 
                 var missingLabels = R.difference(ds.map(R.prop("key")), order).sort();
+                missingLabels = R.difference(missingLabels, ["__nogroup"]);
                 _disaggregators[k].labels = _disaggregators[k].labels.concat(missingLabels.map(R.assoc("value", R.__, {})));
 
                 if (s.process === "integrate") {
@@ -286,7 +287,7 @@ define(['ramda', 'd3'], function (R, d3) {
             bars.enter().append("g")
                 .attr("class", "bars");
             bars.attr("fill", function(d, i) {
-                return setTexture(g, s.texture, colors(i));
+                return setTexture(g, s.texture, colors(i) || "steelblue");
             });
             bars.exit().remove();
 
@@ -433,7 +434,7 @@ define(['ramda', 'd3'], function (R, d3) {
 
         function updateLegend(by) {
             var colors = colorScale(by);
-            var fillFunction = function(d, i) { return colors(i);};
+            var fillFunction = function(d, i) { return colors(i)};
             drawLegendGroup(_disaggregators[by].labels,
                             fillFunction,
                             "disaggregator",
@@ -446,6 +447,8 @@ define(['ramda', 'd3'], function (R, d3) {
                 var m = R.clone(l);
                 if (typeof m.groupBy === "string") {
                     m.groupBy = R.prop(m.groupBy);
+                } else if (m.groupBy === undefined) {
+                    m.groupBy = R.always("__nogroup");
                 }
                 if (m.labels === undefined) {
                     m.labels = [];
