@@ -1,12 +1,13 @@
 This library allows to build graphical representations of logs, where a log is assumed to be represented as a set of key/value, e.g.:
 ```js
-{method: "GET", "path": "/", "date": "2015-03-22T13:37:00"}
+{"method": "GET", "path": "/", "date": "2015-03-22T13:37:00"}
 ```
 
 # API
 This library is built as a RequireJS module. Assuming you want to use it in a `main.js` file, the following code will load the module:
 ```html
-<script data-main="main.js" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.16/require.min.js"></script>```
+<script data-main="main.js" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.16/require.min.js"></script>
+```
 ```js
 // loading dependencies from CDNs via requireJS
 requirejs.config({
