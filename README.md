@@ -28,8 +28,8 @@ var c = new Chart(definition);
 
 where `definition` is an object that takes the following properties:
 
-* `x` is an array of objects, each of which represent an x axis, and is defined by two properties: `type` (possible values: `unit` and `time`) and `label` (used to annotate the axis on the chart)
-* likewise, `y` is an array of objects representing the y axes
+* `x` is an  object which represent the x axis, defined by two properties: `type` (possible values: `unit` and `time`) and `label` (used to annotate the axis on the chart); (if multiple x axes are needed, use an array of objects)
+* likewise, `y` is an object (or array thereof) representing the y axis
 * `width` is the width of the chart in pixels
 * `height` is the height of the chart in pixels
 

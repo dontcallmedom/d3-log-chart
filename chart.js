@@ -2,6 +2,7 @@ define(['ramda', 'd3'], function (R, d3) {
     return function (options) {
         // normalization
         options.y = Array.isArray(options.y) ? options.y : [options.y];
+        options.x = Array.isArray(options.x) ? options.x : [options.x];
 
         /* empty initializations */
         var xs = [];
