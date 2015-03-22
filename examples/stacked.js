@@ -2,7 +2,7 @@
 requirejs.config({
   paths: {
       ramda: "https://cdnjs.cloudflare.com/ajax/libs/ramda/0.11.0/ramda",
-      d3: "http://d3js.org/d3.v3"
+      d3: "https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"
   }
 });
 
