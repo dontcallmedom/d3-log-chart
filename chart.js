@@ -111,7 +111,7 @@ define(['ramda', 'd3'], function (R, d3) {
                 .scale(xs[i])
                 .orient("bottom");
             if (x.type === "time") {
-                axis = axis.tickFormat(d3.time.format("%Y-%m"));
+                axis = axis.tickFormat(d3.time.format("%Y %b"));
             }
             xAxes.push(axis);
         });
@@ -361,8 +361,20 @@ define(['ramda', 'd3'], function (R, d3) {
                     .text(options.x[i].label || "");
                 svg.selectAll(".x .tick text")
                     .style("text-anchor", "end")
-                    .attr({"dx": "-.8em", "dy": "-.55em",
-                           "transform": "rotate(-90)" });
+                    .attr({"dx": "-.8em", "dy": ".3em",
+                           "transform": "rotate(-45)" });
+
+                // avoid repeating information common to a sequence of ticks
+                var ticks = svg.selectAll(".x .tick text")[0];
+                ticks.forEach(function(t, i, arr) {
+                    t.setAttribute("data-text", t.textContent);
+                    if (i > 0) {
+                        var prevText = arr[i-1].dataset.text;
+                        var diff = R.difference(t.textContent.split(" "), prevText.split(" "));
+                        t.textContent = diff.join(" ");
+                    }
+                });
+
             });
 
             ys.forEach(function (y, i) {
