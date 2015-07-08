@@ -287,8 +287,8 @@ define(['ramda', 'd3'], function (R, d3) {
             var bars = g.selectAll('.bars').data(s.data[by]);
             bars.enter().append("g")
                 .attr("class", "bars");
-            bars.attr("fill", function(d, i) {
-                return setTexture(g, s.texture, colors(i) || "steelblue");
+            bars.attr("fill", function(d) {
+                return setTexture(g, s.texture, colors(d.key) || "steelblue");
             });
             bars.exit().remove();
 
