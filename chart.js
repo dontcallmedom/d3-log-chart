@@ -290,7 +290,8 @@ define(['ramda', 'd3'], function (R, d3) {
                 .attr("class", "bars");
             bars.attr("fill", function(d) {
                 return setTexture(g, s.texture, colors(d.key) || "steelblue");
-            });
+            })
+                .property("title", R.prop("key"));
             bars.exit().remove();
 
             bars = g.selectAll(".bars");
@@ -304,7 +305,7 @@ define(['ramda', 'd3'], function (R, d3) {
             bar.attr("y", function(d) { return y(d.values + d.valueOffset) ; })
             // y.range()[0] - y(d.values)
                 .attr("height", R.compose(R.subtract(y.range()[0]), y, R.prop("values")))
-                .select("title").text(R.prop("values"));
+                .select("title").text(function (d) { return "" + d.values +  " " + d.key + " / " + this.parentNode.parentNode.title});
             bar.exit().remove();
             s.labelTypes = s.labelTypes || [];
             var total = 0;
