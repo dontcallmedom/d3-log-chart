@@ -198,6 +198,7 @@ define(['ramda', 'd3'], function (R, d3) {
                         });
                     });
                 });
+                yAxes[i].ticks(Math.min(max,10));
                 y.domain([0, max]);
             }
             drawAxes();
