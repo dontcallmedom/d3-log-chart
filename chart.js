@@ -325,7 +325,7 @@ define(['ramda', 'd3'], function (R, d3) {
                     .style("text-anchor", "middle");
                 text.attr("x", function(d) { return -((y.range()[0] - y(d.values))/2 + y(d.values + d.valueOffset));})
                     .attr("dy", i ? "1.3em" : "-0.6em")
-                    .attr("y", function(d) { return x(formatData(xType)(d.key)) + (i ==1 ? s.width : 0); })
+                    .attr("y", function(d) { return x(formatData(xType)(d.key)) + (i ==1 ? s.width ? (typeof s.width === "function" ? s.width(x.rangeBand()) : s.width) : x.rangeBand() : 0); })
                     .text(labellers[labelType]);
                 text.exit().remove();
             });
