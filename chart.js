@@ -136,6 +136,10 @@ define(['ramda', 'd3'], function (R, d3) {
             }
 
             s.disaggregators = s.disaggregators || Object.keys(_disaggregators);
+            s.labelTypes = s.labelTypes || [];
+            // normalize s.width to be always a function
+            var width = s.width;
+            s.width = s.width ? (typeof s.width === "function" ? s.width : function() { return width;}) : function(band) { return (s.labelTypes.length > 0 && band > 20 ? band - 20 : band);};
             var abscisses = Object.keys(d3.nest().key(s.groupBy).sortKeys(d3.ascending).map(filteredData)).sort();
             s.disaggregators.forEach(function (k) {
                 var order = _disaggregators[k].labels.map(R.prop("value"));
@@ -300,14 +304,13 @@ define(['ramda', 'd3'], function (R, d3) {
 
             bar.enter().append("rect")
                 .attr("x", R.compose(x, formatData(xType), R.prop("key")))
-                .attr("width", s.width ? (typeof s.width === "function" ? s.width(x.rangeBand()) : s.width) : x.rangeBand())
+                .attr("width", s.width(x.rangeBand()))
                 .append("title");
             bar.attr("y", function(d) { return y(d.values + d.valueOffset) ; })
             // y.range()[0] - y(d.values)
                 .attr("height", R.compose(R.subtract(y.range()[0]), y, R.prop("values")))
                 .select("title").text(function (d) { return "" + d.values +  " " + d.key + " / " + this.parentNode.parentNode.title});
             bar.exit().remove();
-            s.labelTypes = s.labelTypes || [];
             var total = 0;
             s.data[by].forEach(function(segment) {
                 total += d3.sum(segment.values, R.prop("values"));
@@ -325,7 +328,7 @@ define(['ramda', 'd3'], function (R, d3) {
                     .style("text-anchor", "middle");
                 text.attr("x", function(d) { return -((y.range()[0] - y(d.values))/2 + y(d.values + d.valueOffset));})
                     .attr("dy", i ? "1.3em" : "-0.6em")
-                    .attr("y", function(d) { return x(formatData(xType)(d.key)) + (i ==1 ? s.width ? (typeof s.width === "function" ? s.width(x.rangeBand()) : s.width) : x.rangeBand() : 0); })
+                    .attr("y", function(d) { return x(formatData(xType)(d.key)) + (i ==1 ? s.width(x.rangeBand()) : 0); })
                     .text(labellers[labelType]);
                 text.exit().remove();
             });
