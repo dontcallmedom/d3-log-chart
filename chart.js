@@ -136,7 +136,7 @@ define(['ramda', 'd3'], function (R, d3) {
             }
 
             s.disaggregators = s.disaggregators || Object.keys(_disaggregators);
-            var abscisses = Object.keys(d3.nest().key(s.groupBy).sortKeys(d3.ascending).map(_data)).sort();
+            var abscisses = Object.keys(d3.nest().key(s.groupBy).sortKeys(d3.ascending).map(filteredData)).sort();
             s.disaggregators.forEach(function (k) {
                 var order = _disaggregators[k].labels.map(R.prop("value"));
                 var ds = d3.nest().key(_disaggregators[k].groupBy)
