@@ -24,7 +24,7 @@ define(['ramda', 'd3'], function (R, d3) {
 
         var yAxisOrientation = ["left", "right"];
 
-        var margin = {top: 20, right: 20, bottom: 70, left: 40};
+        var margin = {top: 40, right: 20, bottom: 40, left: 80};
 
         /* from options */
 
@@ -69,6 +69,36 @@ define(['ramda', 'd3'], function (R, d3) {
                     .out(function(d, y0) { d.valueOffset = y0 || 0; });
             }
             return R.identity;
+        }
+
+        // from http://bl.ocks.org/mbostock/7555321
+        function wrap(text, width) {
+            text.each(function() {
+                var text = d3.select(this),
+                    words = text.text().trim().split(/\s+/).reverse(),
+                    word,
+                    line = [],
+                    lineNumber = 0,
+                    lineHeight = 1.1, // ems
+                    y = text.attr("y"),
+                    dy = parseFloat(text.attr("dy")),
+                    tspan = text.text(null).append("tspan").attr("x", 0).attr("y", y).attr("dy", dy + "em");
+                while (word = words.pop()) {
+                    line.push(word);
+                    tspan.text(line.join(" "));
+                    if (tspan.node().getComputedTextLength() > width) {
+                        line.pop();
+                        tspan.text(line.join(" "));
+                        line = [word];
+                        tspan = text.append("tspan").attr("x", 0).attr("y", y).attr("dy", ++lineNumber * lineHeight + dy + "em").text(word);
+                        if (tspan.node().getComputedTextLength() > width && word.length > Math.round(width/8) + 1) {
+                            tspan.text(word.slice(0, Math.round(width/8)) + '…');
+                            tspan.append("title")
+                                .text(word);
+                        }
+                    }
+                }
+            });
         }
 
         function formatData(type) {
@@ -362,36 +392,34 @@ define(['ramda', 'd3'], function (R, d3) {
                     .call(xAxes[i])
                     .append("text")
                     .attr({"x": options.x[i].width || width,
-                           "dy": "1.3em"})
-                    .style("text-anchor", "start")
-                    .text(options.x[i].label || "");
-                svg.selectAll(".x .tick text")
+                           "dy": "2.3em"})
                     .style("text-anchor", "end")
-                    .attr({"dx": "-.8em", "dy": ".3em",
-                           "transform": "rotate(-45)" });
-
-                // avoid repeating information common to a sequence of ticks
+                    .text(options.x[i].label || "");
+                // avoid repeating information common to the start of a sequence of ticks
                 var ticks = svg.selectAll(".x .tick text")[0];
-                ticks.forEach(function(t, i, arr) {
-                    t.setAttribute("data-text", t.textContent);
-                    if (i > 0) {
-                        var prevText = arr[i-1].dataset.text;
-                        var diff = R.difference(t.textContent.split(" "), prevText.split(" "));
-                        t.textContent = diff.join(" ");
-                    }
+		var maxTickHeight = margin.bottom;
+
+                svg.selectAll(".x .tick text")
+                    .call(wrap, x.rangeBand());
+		// FIXME: do not hardcode font size
+                ticks.forEach(function(t) {
+		    maxTickHeight = Math.max(t.querySelectorAll("tspan").length*12, maxTickHeight);
                 });
 
+		if (maxTickHeight > margin.bottom) {
+		    svgroot.attr("height", parseInt(svgroot.attr("height"), 10) + maxTickHeight - margin.bottom);
+		}
             });
 
             ys.forEach(function (y, i) {
                 svg.append("g")
                     .attr({"class": "y axis",
-                           "transform": "translate(" + (options.y[i].orient == "right" ? width : 0) + ",0)"})
+                           "transform": "translate(" + ((options.y[i].offset || 0) + (options.y[i].orient == "right" ? width : 0)) + ",0)"})
                     .call(yAxes[i])
                     .append("text")
-                    .attr({"transform": "rotate(-90)", "y": 6,
-                           "dy": (options.y[i].orient == "right" ? "-1.3em" : ".71em")})
-                    .style("text-anchor", "end")
+                    .attr({ "y": 0,
+                           "dy": "-.6em"})
+                    .style("text-anchor", "start")
                     .text(options.y[i].label);
             });
             return this;
@@ -413,7 +441,6 @@ define(['ramda', 'd3'], function (R, d3) {
                 .enter().append("option")
                 .attr("checked", R.eq(currentDisaggregator))
                 .text(R.identity);
-
 
             // filter out textures that aren't used
             var usedTextures = Object.keys(textures)
