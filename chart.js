@@ -221,12 +221,12 @@ define(['ramda', 'd3'], function (R, d3) {
                 var abscisses = [];
                 relevantSeries.forEach(function (s) {
                     s.disaggregators.forEach(function (by) {
-                    s.data[by].forEach(function (l) {
-                        abscisses = abscisses.concat(l.values.map(R.prop("key")));
-                    });
+                        s.data[by].forEach(function (l) {
+                            abscisses = abscisses.concat(l.values.map(R.prop("key")));
+                        });
                     });
                 });
-                abscisses = d3.set(abscisses).values().map(formatData(type));
+                abscisses = d3.set(abscisses).values().map(formatData(type)).sort(s.orderBy ? s.orderBy : undefined);
                 x.domain(abscisses);
                 x.call(xAxes[i]);
             }
@@ -246,8 +246,8 @@ define(['ramda', 'd3'], function (R, d3) {
                         });
                     });
                 });
-                yAxes[i].ticks(Math.min(max,10));
                 y.domain([0, max]);
+                yAxes[i].ticks(Math.min(max,10));
             }
             drawAxes();
         }
