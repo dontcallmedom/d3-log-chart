@@ -11,13 +11,13 @@ define(['ramda', 'd3'], function (R, d3) {
         var yAxes = [];
         var ys = [];
 
-        var dataSeries = [];
+        var dataSeries;
         var _series = [];
 
         var _data;
 
         var _disaggregators = {};
-        var defaultDisaggregator;
+        var currentDisaggregator;
 
         /* initial constant values */
         var legendWidth = 200;
@@ -129,7 +129,6 @@ define(['ramda', 'd3'], function (R, d3) {
         // organize data in a manageable structure
         function processSeries(s) {
             s.data = {};
-
             var filteredData = _data;
             if (s.filter) {
                 filteredData = _data.filter(s.filter);
@@ -303,14 +302,15 @@ define(['ramda', 'd3'], function (R, d3) {
                 .data(R.prop("values"));
 
             bar.enter().append("rect")
-                .attr("x", R.compose(x, formatData(xType), R.prop("key")))
-                .attr("width", s.width(x.rangeBand()))
                 .append("title");
+            bar.exit().remove();
+
+            bar.attr("x", R.compose(x, formatData(xType), R.prop("key")))
+                .attr("width", s.width(x.rangeBand()))
             bar.attr("y", function(d) { return y(d.values + d.valueOffset) ; })
             // y.range()[0] - y(d.values)
                 .attr("height", R.compose(R.subtract(y.range()[0]), y, R.prop("values")))
                 .select("title").text(function (d) { return "" + d.values +  " " + d.key + " / " + this.parentNode.parentNode.title});
-            bar.exit().remove();
             var total = 0;
             s.data[by].forEach(function(segment) {
                 total += d3.sum(segment.values, R.prop("values"));
@@ -336,12 +336,13 @@ define(['ramda', 'd3'], function (R, d3) {
         }
 
         function setDisaggregator(disaggregateBy) {
-            disaggregateBy = disaggregateBy || Object.keys(_disaggregators)[0];
+            currentDisaggregator = disaggregateBy ? disaggregateBy : (currentDisaggregator ? currentDisaggregator : Object.keys(_disaggregators)[0]);
+            disaggregateBy = disaggregateBy || currentDisaggregator;
             updateLegend(disaggregateBy);
             _series.forEach(function (s, n) {
                 var by = disaggregateBy;
                 if (s.disaggregators && s.disaggregators.indexOf(by) === -1) {
-                    by = defaultDisaggregator;
+                    by = currentDisaggregator;
                 }
                 if (s.type === "line") {
                     drawChartLine(s, by);
@@ -410,7 +411,7 @@ define(['ramda', 'd3'], function (R, d3) {
                 .selectAll("option")
                 .data(Object.keys(_disaggregators))
                 .enter().append("option")
-                .attr("checked", R.eq(defaultDisaggregator))
+                .attr("checked", R.eq(currentDisaggregator))
                 .text(R.identity);
 
 
@@ -480,6 +481,7 @@ define(['ramda', 'd3'], function (R, d3) {
 
         function data(d) {
             _data = d;
+            dataSeries = [];
             return this;
         }
 
@@ -488,11 +490,11 @@ define(['ramda', 'd3'], function (R, d3) {
             series.xAxis = series.xAxis || 0;
             series.yAxis = series.yAxis || 0;
             _series.push(series);
-            processSeries(series);
             return this;
         }
 
         function draw() {
+            _series.forEach(s => processSeries(s));
             drawLegend();
             setDisaggregator();
             return this;
