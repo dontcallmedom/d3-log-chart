@@ -127,8 +127,13 @@ define(['ramda', 'd3'], function (R, d3) {
         /* variable setting */
 
         var svgroot = d3.select(document.createElementNS("http://www.w3.org/2000/svg", "svg"))
-            .attr({width: width + margin.left + margin.right + extraWidth + legendWidth,
+            .attr({width: width + margin.left + margin.right + extraWidth,
                    height: height + margin.top + margin.bottom});
+
+        var legendroot = d3.select(document.createElementNS("http://www.w3.org/2000/svg", "svg"))
+            .attr({width: legendWidth});
+
+        var uiroot = d3.select(document.createElement("div"));
 
         var svg = svgroot.append("g")
             .attr("transform",
@@ -434,14 +439,8 @@ define(['ramda', 'd3'], function (R, d3) {
         }
 
         function drawLegend() {
-            var g = svg.append("g")
-                .attr({"class": "legend",
-                       "transform": "translate(" + (width + extraWidth)  + ",0)"});
-            g.append("g")
-                .classed("selector", true)
-                .append("foreignObject")
-                .attr({"width": 200, "height": 40})
-                .append("xhtml:select")
+            uiroot.selectAll("select").data(['']).enter()
+                .append("select")
                 .attr("name", "disaggregateBy")
                 .on("change", function() { setDisaggregator(Object.keys(_disaggregators)[this.selectedIndex]);})
                 .selectAll("option")
@@ -456,12 +455,11 @@ define(['ramda', 'd3'], function (R, d3) {
                     return _series.reduce(function (prev, cur) { return prev || cur.texture === t;}, false);
                 }).map(R.propOf(textures));
 
-            var keys = g.selectAll(".keys")
+            var keys = legendroot.selectAll(".keys")
                 .data(["texture", "disaggregator"])
                 .enter().append("g")
                 .attr("class", R.identity)
-                .classed("keys", true)
-                .attr("transform", "translate(0,40)");
+                .classed("keys", true);
             drawLegendGroup(usedTextures,
                             // setTexture(keys, _.name)
                             R.compose(R.curry(R.binary(setTexture))(keys), R.prop("name")),
@@ -470,7 +468,7 @@ define(['ramda', 'd3'], function (R, d3) {
 
         function drawLegendGroup(legends, fillFunction, groupname, offset) {
             offset = offset || 0;
-            var keys = svg.selectAll(".keys." + groupname);
+            var keys = legendroot.selectAll(".keys." + groupname);
             var squares = keys.selectAll("rect." + groupname)
                 .data(legends);
             squares.enter().append("rect")
@@ -494,7 +492,7 @@ define(['ramda', 'd3'], function (R, d3) {
             drawLegendGroup(_disaggregators[by].labels,
                             fillFunction,
                             "disaggregator",
-                            svg.node().querySelectorAll(".keys rect.texture").length
+                            legendroot.node().querySelectorAll(".keys rect.texture").length
                            );
         }
 
@@ -542,7 +540,9 @@ define(['ramda', 'd3'], function (R, d3) {
             draw: draw,
             series: series,
             setDisaggregator: setDisaggregator,
-            node: svgroot.node()
+            node: svgroot.node(),
+            legendNode: legendroot.node(),
+            uiNode: uiroot.node()
         };
 
         return api;
