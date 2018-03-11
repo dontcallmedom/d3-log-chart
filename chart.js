@@ -424,8 +424,15 @@ define(['ramda', 'd3'], function (R, d3) {
         }
 
         function drawAxes() {
+            function navigate(linker) {
+              return function(d) {
+                  document.location.href= linker(d);
+              };
+            }
+
             svg.selectAll(".axis").remove();
             xs.forEach(function (x, i) {
+                var linkAttr = {};
                 svg.append("g")
                     .attr({"class": "x axis",
                            "transform": "translate(" + (options.x[i].offset || 0) + "," + height + ")"})
@@ -445,6 +452,15 @@ define(['ramda', 'd3'], function (R, d3) {
                 ticks.forEach(function(t) {
 		    maxTickHeight = Math.max(t.querySelectorAll("tspan").length*12, maxTickHeight);
                 });
+
+                if (options.x[i].linker) {
+                  svg.selectAll(".x .tick text")
+                    .style("cursor", "pointer")
+                    .style("text-decoration", "underline")
+                    .style("fill", "blue")
+                    .attr("focusable","true")
+                    .on("click", navigate(options.x[i].linker));
+                }
 
 		if (maxTickHeight > margin.bottom) {
 		    svgroot.attr("height", parseInt(svgroot.attr("height"), 10) + maxTickHeight - margin.bottom);
