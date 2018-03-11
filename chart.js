@@ -71,6 +71,10 @@ define(['ramda', 'd3'], function (R, d3) {
             return R.identity;
         }
 
+        function formatTime(t) {
+            return new Date(Date.parse(t));
+        }
+
         // from http://bl.ocks.org/mbostock/7555321
         function wrap(text, width) {
             text.each(function() {
@@ -102,9 +106,11 @@ define(['ramda', 'd3'], function (R, d3) {
         }
 
         function formatData(type) {
-            if (type === "time") {
-                return d3.time.format("%Y-%m").parse;
-            }
+            if (type === "day" || type === "month") {
+                return formatTime;
+            } else if (typeof type === "function") {
+		return type;
+	    }
             return R.identity;
         }
 
@@ -140,7 +146,9 @@ define(['ramda', 'd3'], function (R, d3) {
             var axis = d3.svg.axis()
                 .scale(xs[i])
                 .orient("bottom");
-            if (x.type === "time") {
+            if (x.type === "day") {
+                axis = axis.tickFormat(d3.time.format("%Y %b %d"));
+            } else if (x.type === "month") {
                 axis = axis.tickFormat(d3.time.format("%Y %b"));
             }
             xAxes.push(axis);
