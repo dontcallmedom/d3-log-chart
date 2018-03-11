@@ -179,7 +179,9 @@ define(['ramda', 'd3'], function (R, d3) {
 
             s.disaggregators = s.disaggregators || Object.keys(_disaggregators);
             s.labelTypes = s.labelTypes || [];
-            // normalize s.width to be always a function
+
+            s.labeller = s.labeller || function (absValue, total, xData, category) { return "" + absValue +  "/" + total + " (" + Math.round(100*absValue/total) + "%) " + xData + " / " + category};
+            // normalize s.width and s.offset to be always functions
             var width = s.width;
             s.width = s.width ? (typeof s.width === "function" ? s.width : function() { return width;}) : function(band) { return (s.labelTypes.length > 0 && band > 20 ? band - 20 : band);};
             var abscisses = Object.keys(d3.nest().key(s.groupBy).sortKeys(d3.ascending).map(filteredData)).sort();
@@ -339,10 +341,25 @@ define(['ramda', 'd3'], function (R, d3) {
             })
                 .property("title", R.prop("key"));
             bars.exit().remove();
+            var total = 0;
+            s.data[by].forEach(function(segment) {
+                total += d3.sum(segment.values, R.prop("values"));
+            });
+
+            var catTotal = 0;
+            // TODO: kludge
+            var totalDisaggregator = s.disaggregators[s.disaggregators.length - 1];
+            s.data[totalDisaggregator].forEach(function(segment) {
+                catTotal += d3.sum(segment.values, R.prop("values"));
+            });
 
             bars = g.selectAll(".bars");
             var bar = bars.selectAll("rect")
                 .data(R.prop("values"));
+
+            var colTotal = function(d) {
+                return s.data[totalDisaggregator][0].values.filter(function(x) { return x.key==d.key;})[0].values
+            }
 
             bar.enter().append("rect")
                 .append("title");
@@ -353,11 +370,7 @@ define(['ramda', 'd3'], function (R, d3) {
             bar.attr("y", function(d) { return y(d.values + d.valueOffset) ; })
             // y.range()[0] - y(d.values)
                 .attr("height", R.compose(R.subtract(y.range()[0]), y, R.prop("values")))
-                .select("title").text(function (d) { return "" + d.values +  " " + d.key + " / " + this.parentNode.parentNode.title});
-            var total = 0;
-            s.data[by].forEach(function(segment) {
-                total += d3.sum(segment.values, R.prop("values"));
-            });
+                .select("title").text(function(d) { return s.labeller(d.values, colTotal(d) , formatData(options.x[s.xAxis].type)(d.key), this.parentNode.parentNode.title);});
 
             var labellers = {
                 "unit": R.prop("values"),
@@ -370,12 +383,26 @@ define(['ramda', 'd3'], function (R, d3) {
                     .attr({transform: "rotate(-90)", "class": labelType, fill: "black"})
                     .style("text-anchor", "middle");
                 text.attr("x", function(d) { return -((y.range()[0] - y(d.values))/2 + y(d.values + d.valueOffset));})
-                    .attr("dy", i ? "1.3em" : "-0.6em")
+                    .attr("dy", i ? "1em" : "-0.2em")
                     .attr("y", function(d) { return x(formatData(xType)(d.key)) + (i ==1 ? s.width(x.rangeBand()) : 0); })
                     .text(labellers[labelType]);
                 text.exit().remove();
             });
-
+            var fontSize = Math.min(x.rangeBand() - 2, 10);
+            var text = svg.selectAll("text.catpercent")
+                .data((s.data[totalDisaggregator][0] || {}).values || []);
+            text.enter()
+                .append("text")
+                .attr("font-size", fontSize)
+                .attr("class", "catpercent")
+                .attr("text-anchor", "middle");
+            text.attr("x", function(d) { return x(formatData(xType)(d.key)) + s.width(x.rangeBand()) / 2; })
+                .attr("y", y(0))
+                .text(function(d) {
+                    var value= Math.round((d.values / catTotal)*100) ;
+                    return value ? value + "%" : ""
+                });
+            text.exit().remove();
         }
 
         function setDisaggregator(disaggregateBy) {
