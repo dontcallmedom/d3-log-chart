@@ -13,6 +13,13 @@ require(['../chart'], function (Chart){
   document.getElementById('simple').appendChild(c.node);
   c.disaggregators(simple_disaggregators);
 
+  // we add the legend and the disaggregator selector
+  var div = document.createElement("div");
+  div.className = "chart-control";
+  div.appendChild(c.uiNode);
+  div.appendChild(c.legendNode);
+  document.getElementById('simple').appendChild(div);
+
   d3.json('data.json', function(error, data) {
    c.data(data)
     .series({ type: "bar",
